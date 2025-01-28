@@ -1,0 +1,27 @@
+runs:
+  using: "composite"
+  steps:
+    - if: runner.os == 'Linux'
+      name: Install apt packages
+      shell: bash
+      run: sudo apt-get install -y curl git git-lfs zip build-essential entr libssl-dev libdouble-conversion-dev pkg-config ninja-build cmake zlib1g-dev libffi-dev clang libclang-dev llvm llvm-dev libzip-dev libbz2-dev doctest-dev libboost-all-dev gcc g++ libgc-dev
+    - if: runner.os == 'macOS'
+      name: Install brew packages
+      shell: bash
+      run: HOMEBREW_NO_AUTO_UPDATE=1 brew install curl git git-lfs zip entr openssl double-conversion pkg-config ninja python cmake gnupg zlib doctest boost libzip lbzip2 llvm@19
+    - name: Restore cached Clang/LLVM
+      id: restore-clang-cache
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ${{ github.workspace }}/compiler+runtime/build
+        key: ${{ runner.os }}-${{ hashFiles('compiler+runtime/bin/build-clang') }}
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+    - name: Install clojure tools
+      uses: DeLaGuardo/setup-clojure@13.1
+      with:
+        cli: latest
+        lein: 2.9.1

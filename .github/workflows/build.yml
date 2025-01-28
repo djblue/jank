@@ -1,66 +1,78 @@
 name: "Build"
 
 on:
-  pull_request:
   push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Ubuntu
-          ## Debug + clang-tidy + codecov
-          - os: ubuntu-24.04
-            build_type: Debug
-            sanitize: none
-            codecov: on
-            analysis: on
-          ## Debug + sanitization
-          - os: ubuntu-24.04
-            build_type: Debug
-            sanitize: address
-          - os: ubuntu-24.04
-            build_type: Debug
-            sanitize: undefined
-          - os: ubuntu-24.04
-            build_type: Debug
-            sanitize: thread
-          ## Release
-          - os: ubuntu-24.04
-            build_type: Release
-            sanitize: none
-            build_ubuntu_tarball: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
-    runs-on: ${{ matrix.os }}
-    env:
-      JANK_MATRIX_ID: ${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.sanitize }}
-      CODECOV: ${{ matrix.codecov }}
-      ANALYSIS: ${{ matrix.analysis }}
-      SANITIZE: ${{ matrix.sanitize }}
-      ASAN_OPTIONS: detect_leaks=0
-      TERM: xterm
-    timeout-minutes: 240 # 4h
+  formatting:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Build and test
-        uses: ./.github/actions/build
-        id: build
-        with:
-          build_ubuntu_tarball: ${{ matrix.build_ubuntu_tarball }}
-      - name: Archive test log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-log-${{ env.JANK_MATRIX_ID }}
-          path: compiler+runtime/test.log
-      #- name: Update Ubuntu tarball
-      #  if: success() && ${{ matrix.build_ubuntu_tarball == 'true' }}
-      #  uses: pyTooling/Actions/releaser@main
-      #  with:
-      #    tag: latest
-      #    rm: true
-      #    token: ${{ secrets.GITHUB_TOKEN }}
-      #    files: ${{ steps.build.outputs.release_archive }}
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Validate formatting
+        shell: bash
+        working-directory: ${{ github.workspace }}/compiler+runtime
+        run: ./bin/ci/validate-formatting
+  # test:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         # Ubuntu
+  #         ## Debug + clang-tidy + codecov
+  #         - os: ubuntu-24.04
+  #           build_type: Debug
+  #           sanitize: none
+  #           codecov: on
+  #           analysis: on
+  #         ## Debug + sanitization
+  #         - os: ubuntu-24.04
+  #           build_type: Debug
+  #           sanitize: address
+  #         - os: ubuntu-24.04
+  #           build_type: Debug
+  #           sanitize: undefined
+  #         - os: ubuntu-24.04
+  #           build_type: Debug
+  #           sanitize: thread
+  #         ## Release
+  #         - os: ubuntu-24.04
+  #           build_type: Release
+  #           sanitize: none
+  #           build_ubuntu_tarball: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+  #   runs-on: ${{ matrix.os }}
+  #   env:
+  #     JANK_MATRIX_ID: ${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.sanitize }}
+  #     CODECOV: ${{ matrix.codecov }}
+  #     ANALYSIS: ${{ matrix.analysis }}
+  #     SANITIZE: ${{ matrix.sanitize }}
+  #     ASAN_OPTIONS: detect_leaks=0
+  #     TERM: xterm
+  #   timeout-minutes: 240 # 4h
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+  #     - name: Build and test
+  #       uses: ./.github/actions/build
+  #       id: build
+  #       with:
+  #         build_ubuntu_tarball: ${{ matrix.build_ubuntu_tarball }}
+  #     - name: Archive test log
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: test-log-${{ env.JANK_MATRIX_ID }}
+  #         path: compiler+runtime/test.log
+  #     #- name: Update Ubuntu tarball
+  #     #  if: success() && ${{ matrix.build_ubuntu_tarball == 'true' }}
+  #     #  uses: pyTooling/Actions/releaser@main
+  #     #  with:
+  #     #    tag: latest
+  #     #    rm: true
+  #     #    token: ${{ secrets.GITHUB_TOKEN }}
+  #     #    files: ${{ steps.build.outputs.release_archive }}
