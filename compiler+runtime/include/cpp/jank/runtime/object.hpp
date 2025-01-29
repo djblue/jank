@@ -82,7 +82,9 @@ namespace jank::runtime
     var_unbound_root,
 
     tagged_literal,
-    regex,
+
+    re_pattern,
+    re_matcher,
   };
 
   constexpr char const *object_type_str(object_type const type)
@@ -214,8 +216,11 @@ namespace jank::runtime
 
       case object_type::tagged_literal:
         return "tagged_literal";
-      case object_type::regex:
-        return "regex";
+
+      case object_type::re_pattern:
+        return "re_pattern";
+      case object_type::re_matcher:
+        return "re_matcher";
     }
     return "unknown";
   }

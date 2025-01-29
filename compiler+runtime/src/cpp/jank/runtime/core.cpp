@@ -604,16 +604,40 @@ namespace jank::runtime
   {
     if(auto const typed_o = dyn_cast<obj::persistent_string>(o))
     {
-      return make_box<obj::regex>(typed_o->data);
+      return make_box<obj::re_pattern>(typed_o->data);
     }
-    else if (o->type == object_type::regex)
+    else if(o->type == object_type::re_pattern)
     {
       return o;
-
     }
     else
     {
-      return obj::nil::nil_const();
+      throw erase(make_box(fmt::format("Expected string, got {}", object_type_str(o->type))));
     }
+  }
+
+  object_ptr re_matcher(object_ptr const re, object_ptr const s)
+  {
+    if(auto const typed_re = dyn_cast<obj::re_pattern>(re))
+    {
+      if(auto const typed_s = dyn_cast<obj::persistent_string>(s))
+      {
+        return make_box<obj::re_matcher>(typed_re, typed_s->data);
+      }
+
+      throw erase(make_box(fmt::format("Expected string, got {}", object_type_str(s->type))));
+    }
+
+    throw erase(make_box(fmt::format("Expected pattern, got {}", object_type_str(re->type))));
+  }
+
+  native_bool re_groups(object_ptr m)
+  {
+    if(auto const typed_m = dyn_cast<obj::re_matcher>(m))
+    {
+      return typed_m->group();
+    }
+
+    throw erase(make_box(fmt::format("Expected matcher, got {}", object_type_str(m->type))));
   }
 }

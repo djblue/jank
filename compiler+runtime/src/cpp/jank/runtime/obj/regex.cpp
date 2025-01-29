@@ -6,15 +6,15 @@
 
 namespace jank::runtime::obj
 {
-  regex::regex(std::string const &s)
+  re_pattern::re_pattern(std::string const &s)
     : s{ s }
   {
     data = new std::regex(s);
   }
 
-  native_bool regex::equal(object const &o) const
+  native_bool re_pattern::equal(object const &o) const
   {
-    if(o.type != object_type::regex)
+    if(o.type != object_type::re_pattern)
     {
       return false;
     }
@@ -31,24 +31,24 @@ namespace jank::runtime::obj
     buff('"');
   }
 
-  void regex::to_string(util::string_builder &buff) const
+  void re_pattern::to_string(util::string_builder &buff) const
   {
     to_string_impl(s, buff);
   }
 
-  native_persistent_string regex::to_string() const
+  native_persistent_string re_pattern::to_string() const
   {
     util::string_builder buff;
     to_string_impl(s, buff);
     return buff.release();
   }
 
-  native_persistent_string regex::to_code_string() const
+  native_persistent_string re_pattern::to_code_string() const
   {
     return to_string();
   }
 
-  native_hash regex::to_hash() const
+  native_hash re_pattern::to_hash() const
   {
     if(hash)
     {
@@ -57,5 +57,56 @@ namespace jank::runtime::obj
 
     // return hash = boost::hash<std::tm>()(data);
     return 0;
+  }
+
+  re_matcher::re_matcher(re_pattern_ptr re, native_persistent_string const &s)
+    : re{ re }
+    , s{ s }
+  {
+  }
+
+  native_bool re_matcher::equal(object const &o) const
+  {
+    if(o.type != object_type::re_matcher)
+    {
+      return false;
+    }
+
+    // auto const s(expect_object<inst>(&o));
+    // return s->data == data;
+    return true;
+  }
+
+  void re_matcher::to_string(util::string_builder &buff) const
+  {
+    buff("#<re_matcher>");
+  }
+
+  native_persistent_string re_matcher::to_string() const
+  {
+    util::string_builder buff;
+    buff("#<re_matcher>");
+    return buff.release();
+  }
+
+  native_persistent_string re_matcher::to_code_string() const
+  {
+    return to_string();
+  }
+
+  native_hash re_matcher::to_hash() const
+  {
+    if(hash)
+    {
+      return hash;
+    }
+
+    // return hash = boost::hash<std::tm>()(data);
+    return 0;
+  }
+
+  native_bool re_matcher::group()
+  {
+    return true;
   }
 }

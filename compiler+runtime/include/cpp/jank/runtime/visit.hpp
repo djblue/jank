@@ -359,9 +359,14 @@ namespace jank::runtime
           return fn(expect_object<obj::tagged_literal>(erased), std::forward<Args>(args)...);
         }
         break;
-      case object_type::regex:
+      case object_type::re_pattern:
         {
-          return fn(expect_object<obj::regex>(erased), std::forward<Args>(args)...);
+          return fn(expect_object<obj::re_pattern>(erased), std::forward<Args>(args)...);
+        }
+        break;
+      case object_type::re_matcher:
+        {
+          return fn(expect_object<obj::re_matcher>(erased), std::forward<Args>(args)...);
         }
         break;
       default:

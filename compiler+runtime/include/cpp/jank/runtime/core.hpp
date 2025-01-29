@@ -88,4 +88,6 @@ namespace jank::runtime
   native_bool is_tagged_literal(object_ptr o);
 
   object_ptr re_pattern(object_ptr o);
+  object_ptr re_matcher(object_ptr re, object_ptr s);
+  native_bool re_groups(object_ptr m);
 }
