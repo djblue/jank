@@ -600,4 +600,20 @@ namespace jank::runtime
     return o->type == object_type::tagged_literal;
   }
 
+  object_ptr re_pattern(object_ptr o)
+  {
+    if(auto const typed_o = dyn_cast<obj::persistent_string>(o))
+    {
+      return make_box<obj::regex>(typed_o->data);
+    }
+    else if (o->type == object_type::regex)
+    {
+      return o;
+
+    }
+    else
+    {
+      return obj::nil::nil_const();
+    }
+  }
 }

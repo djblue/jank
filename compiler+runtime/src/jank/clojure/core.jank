@@ -5729,14 +5729,10 @@
         (do (f) :ok)
         :no-test)))
 
-(defn re-pattern
+(def re-pattern
   "Returns an instance of java.util.regex.Pattern, for use, e.g. in
   re-matcher."
-  [s]
-  ;; (if (instance? java.util.regex.Pattern s)
-  ;;   s
-  ;;   (. java.util.regex.Pattern (compile s)))
-  (throw "TODO: port"))
+  clojure.core-native/re-pattern)
 
 (defn re-matcher
   "Returns an instance of java.util.regex.Matcher, for use, e.g. in
