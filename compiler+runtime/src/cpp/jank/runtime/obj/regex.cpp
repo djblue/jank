@@ -1,6 +1,9 @@
 #include <string>
 #include <regex>
 
+#include <iostream>
+#include <boost/regex.hpp>
+
 #include <jank/runtime/obj/regex.hpp>
 #include <jank/runtime/rtti.hpp>
 
@@ -9,7 +12,7 @@ namespace jank::runtime::obj
   re_pattern::re_pattern(std::string const &s)
     : s{ s }
   {
-    data = new std::regex(s);
+    data = new boost::regex(s);
   }
 
   native_bool re_pattern::equal(object const &o) const
@@ -107,6 +110,12 @@ namespace jank::runtime::obj
 
   native_bool re_matcher::group()
   {
-    return true;
+    boost::smatch m;
+    if (boost::regex_match(s.c_str(), m, *re->data, boost::match_extra))
+    {
+
+      return true;
+    }
+    return false;
   }
 }

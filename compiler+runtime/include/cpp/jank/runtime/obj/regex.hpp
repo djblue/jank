@@ -1,6 +1,7 @@
 #pragma once
 
 #include <regex>
+#include <boost/regex.hpp>
 #include <string>
 
 #include <jank/runtime/object.hpp>
@@ -24,7 +25,7 @@ namespace jank::runtime::obj
     object base{ obj_type };
 
     std::string s{};
-    std::regex *data{};
+    boost::regex *data{};
 
     mutable native_hash hash{};
   };
