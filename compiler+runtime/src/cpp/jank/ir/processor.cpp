@@ -68,6 +68,7 @@ namespace jank::ir
     }
 
     static auto const dynamic_kw{ runtime::__rt_ctx->intern_keyword("dynamic").expect_ok() };
+    b.source_location(runtime::object_source(expr->name));
     return b.def(expr->position,
                  expr->name->to_code_string(),
                  value_ident,
@@ -97,6 +98,7 @@ namespace jank::ir
     }
 
     auto const fn_ident{ gen(expr->source_expr, b).unwrap() };
+    b.source_location(runtime::object_source(expr->form));
     return b.dynamic_call(expr->position, fn_ident, jtl::move(arg_idents));
   }
 
@@ -765,6 +767,7 @@ namespace jank::ir
 
   jtl::option<identifier> gen(analyze::expr::cpp_value_ref const expr, builder &b)
   {
+    b.source_location(runtime::object_source(expr->form));
     return b.cpp_value(expr);
   }
 
@@ -789,6 +792,11 @@ namespace jank::ir
 
     if(expr->source_expr->kind == analyze::expression_kind::cpp_value)
     {
+      auto const source{ static_cast<analyze::expr::cpp_value *>(expr->source_expr.data) };
+      if(source->form.is_some())
+      {
+        b.source_location(runtime::object_source(source->form));
+      }
       return b.cpp_call(none, jtl::move(args), expr);
     }
     return b.cpp_call(gen(expr->source_expr, b).unwrap(), jtl::move(args), expr);
@@ -834,11 +842,13 @@ namespace jank::ir
 
   jtl::option<identifier> gen(analyze::expr::cpp_box_ref const expr, builder &b)
   {
+    b.source_location(expr->source);
     return b.cpp_box(gen(expr->value_expr, b).unwrap(), expr);
   }
 
   jtl::option<identifier> gen(analyze::expr::cpp_unbox_ref const expr, builder &b)
   {
+    b.source_location(expr->source);
     return b.cpp_unbox(
       gen(expr->value_expr, b).unwrap(),
       b.literal(analyze::expression_position::value, runtime::source_to_meta(expr->source)),
